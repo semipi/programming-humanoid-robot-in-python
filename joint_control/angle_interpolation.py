@@ -22,7 +22,7 @@
 
 from pid import PIDAgent
 from keyframes import hello
-from keyframes import leftBellyToStand
+from keyframes import rightBackToStand
 
 
 class AngleInterpolationAgent(PIDAgent):
@@ -51,35 +51,34 @@ class AngleInterpolationAgent(PIDAgent):
             name = names[i]
             if name in self.joint_names: #only update known joints
                 for j in range(len(times[i])-1): # each line of keys corresponds to a time
-                    print self.start_time
                     if times[i][j] < self.start_time < times[i][j+1]: #check which time we need to consider
                     
-                        delta_t0 = keys[i][j][1][1] # point 0
+                        delta_t0 = keys[i][j][1][1] # point 0 #TODO
                         delta_angle0 = keys[i][j][1][2]
                         angle0 = self.calculate_joint_angle(name, delta_angle0)
                         
-                        delta_t1 = keys[i][j][2][1] #point 1
+                        delta_t1 = keys[i][j][2][1] #point 1 #TODO
                         delta_angle1 = keys[i][j][2][2]
                         angle1 = self.calculate_joint_angle(name, delta_angle1)
                         
-                        delta_t2 = keys[i][j+1][1][1] #point 2
+                        delta_t2 = keys[i][j+1][1][1] #point 2 #TODO
                         delta_angle2 = keys[i][j+1][1][2]
                         angle2 = self.calculate_joint_angle(name, delta_angle2)
                         
-                        delta_t3 = keys[i][j+1][2][1] #point 3
+                        delta_t3 = keys[i][j+1][2][1] #point 3 #TODO
                         delta_angle3 = keys[i][j+1][2][2]
                         angle3 = self.calculate_joint_angle(name, delta_angle3)
                         
-                        t = (self.start_time / times[i][j+1]) * times[i][j]
+                        t = self.start_time / times[i][j+1]
                         c1 = (1-t)**3
                         c2 = 3*(1-t)**2
-                    
+                        
                         target_joints[name] = c1*angle0 + c2*angle1*t + c2*angle2*t**2 + angle3*t**3 #each joint will get a new angle value
         
         return target_joints
         
-    def calculate_joint_angle(self, jointName, delta_angle):
-        return  self.perception.joint[jointName] + delta_angle
+    def calculate_joint_angle(self, joint_name, delta_angle):
+        return self.perception.joint[joint_name] + delta_angle
         
     def calculate_start_time(self, perception_time, old_start_time):
         new_start_value = perception_time - old_start_time
@@ -88,7 +87,7 @@ class AngleInterpolationAgent(PIDAgent):
 
 if __name__ == '__main__':
     agent = AngleInterpolationAgent()
-    agent.keyframes = leftBellyToStand()  #hello, leftBackToStand, leftBellyToStand, rightBackToStand, rightBellyToStand, wipe_forehead
+    agent.keyframes = hello()  #hello, leftBackToStand, leftBellyToStand, rightBackToStand, rightBellyToStand, wipe_forehead
     agent.run()
     
 
