@@ -33,6 +33,7 @@ class AngleInterpolationAgent(PIDAgent):
                  sync_mode=True):
         super(AngleInterpolationAgent, self).__init__(simspark_ip, simspark_port, teamname, player_id, sync_mode)
         self.keyframes = ([], [], [])
+        self.start_time = 0
 
     def think(self, perception):
         target_joints = self.angle_interpolation(self.keyframes)
@@ -42,42 +43,47 @@ class AngleInterpolationAgent(PIDAgent):
     def angle_interpolation(self, keyframes):
         target_joints = {}
         
-        currentTime = self.perception.time
+        self.start_time = self.calculate_start_time(self.perception.time, self.start_time)
+        print self.start_time
+        
         names, times, keys = keyframes
         
         for i in range(len(names)): #iterate through all joints
             name = names[i]
             if name in self.joint_names: #only update known joints
                 for j in range(len(times[i])-1): # each line of keys corresponds to a time
-                   # if times[j] < currentTime < times[j+1]: #check which time we need to consider
-                    angleOfJoint = keys[i][j][0]
-                    handle2OfJoint = keys[i][j][2]
+                    if times[j] < self.start_time < times[j+1]: #check which time we need to consider
                     
-                    delta_t0 = keys[i][j][1][1] # point 0
-                    delta_angle0 = keys[i][j][1][2]
-                    angle0 = self.calculateJointAngle(name, delta_angle0)
+                        delta_t0 = keys[i][j][1][1] # point 0
+                        delta_angle0 = keys[i][j][1][2]
+                        angle0 = self.calculate_joint_angle(name, delta_angle0)
+                        
+                        delta_t1 = keys[i][j][2][1] #point 1
+                        delta_angle1 = keys[i][j][2][2]
+                        angle1 = self.calculate_joint_angle(name, delta_angle1)
+                        
+                        delta_t2 = keys[i][j+1][1][1] #point 2
+                        delta_angle2 = keys[i][j+1][1][2]
+                        angle2 = self.calculate_joint_angle(name, delta_angle2)
+                        
+                        delta_t3 = keys[i][j+1][2][1] #point 3
+                        delta_angle3 = keys[i][j+1][2][2]
+                        angle3 = self.calculate_joint_angle(name, delta_angle3)
+                        
+                        t = (current_time / times[j+1]) * times[j]
+                        c1 = (1-t)**3
+                        c2 = 3*(1-t)**2
                     
-                    delta_t1 = keys[i][j][2][1] #point 1
-                    delta_angle1 = keys[i][j][2][2]
-                    angle1 = self.calculateJointAngle(name, delta_angle1)
-                    
-                    delta_t2 = keys[i][j+1][1][1] #point 2
-                    delta_angle2 = keys[i][j+1][1][2]
-                    angle2 = self.calculateJointAngle(name, delta_angle2)
-                    
-                    delta_t3 = keys[i][j+1][2][1] #point 3
-                    delta_angle3 = keys[i][j+1][2][2]
-                    angle3 = self.calculateJointAngle(name, delta_angle3)
-                    
-                    c1 = (1-currentTime)**3
-                    c2 = 3*(1-currentTime)**2
-                    
-                    target_joints[name] = c1*angle0 + c2*angle1*currentTime + c2*angle2*currentTime**2 + angle3*currentTime**3 #each joint will get a new angle value
+                        target_joints[name] = c1*angle0 + c2*angle1*t + c2*angle2*t**2 + angle3*t**3 #each joint will get a new angle value
         
         return target_joints
         
-    def calculateJointAngle(self, jointName, delta_angle):
+    def calculate_joint_angle(self, jointName, delta_angle):
         return  self.perception.joint[jointName] + delta_angle
+        
+    def calculate_start_time(self, perception_time, old_start_time):
+        new_start_value = perception_time - old_start_time
+        return 0 if new_start_value < 0 else new_start_value
         
 
 if __name__ == '__main__':
