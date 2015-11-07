@@ -44,7 +44,6 @@ class AngleInterpolationAgent(PIDAgent):
         target_joints = {}
         
         self.start_time = self.calculate_start_time(self.perception.time, self.start_time)
-        print self.start_time
         
         names, times, keys = keyframes
         
@@ -52,7 +51,8 @@ class AngleInterpolationAgent(PIDAgent):
             name = names[i]
             if name in self.joint_names: #only update known joints
                 for j in range(len(times[i])-1): # each line of keys corresponds to a time
-                    if times[j] < self.start_time < times[j+1]: #check which time we need to consider
+                    print self.start_time
+                    if times[i][j] < self.start_time < times[i][j+1]: #check which time we need to consider
                     
                         delta_t0 = keys[i][j][1][1] # point 0
                         delta_angle0 = keys[i][j][1][2]
@@ -70,7 +70,7 @@ class AngleInterpolationAgent(PIDAgent):
                         delta_angle3 = keys[i][j+1][2][2]
                         angle3 = self.calculate_joint_angle(name, delta_angle3)
                         
-                        t = (current_time / times[j+1]) * times[j]
+                        t = (self.start_time / times[i][j+1]) * times[i][j]
                         c1 = (1-t)**3
                         c2 = 3*(1-t)**2
                     
@@ -88,7 +88,7 @@ class AngleInterpolationAgent(PIDAgent):
 
 if __name__ == '__main__':
     agent = AngleInterpolationAgent()
-    agent.keyframes = hello()  #hello, leftBackToStand, leftBellyToStand, rightBackToStand, rightBellyToStand, wipe_forehead
+    agent.keyframes = leftBellyToStand()  #hello, leftBackToStand, leftBellyToStand, rightBackToStand, rightBellyToStand, wipe_forehead
     agent.run()
     
 
