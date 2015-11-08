@@ -47,35 +47,72 @@ class AngleInterpolationAgent(PIDAgent):
         
         names, times, keys = keyframes
         
-        for i in range(len(names)): #iterate through all joints
-            name = names[i]
-            if name in self.joint_names: #only update known joints
-                for j in range(len(times[i])-1): # each line of keys corresponds to a time
-                    if times[i][j] < self.start_time < times[i][j+1]: #check which time we need to consider
-                    
-                        delta_t0 = keys[i][j][1][1] # point 0 #TODO
-                        delta_angle0 = keys[i][j][1][2]
-                        angle0 = self.calculate_joint_angle(name, delta_angle0)
-                        
-                        delta_t1 = keys[i][j][2][1] #point 1 #TODO
-                        delta_angle1 = keys[i][j][2][2]
-                        angle1 = self.calculate_joint_angle(name, delta_angle1)
-                        
-                        delta_t2 = keys[i][j+1][1][1] #point 2 #TODO
-                        delta_angle2 = keys[i][j+1][1][2]
-                        angle2 = self.calculate_joint_angle(name, delta_angle2)
-                        
-                        delta_t3 = keys[i][j+1][2][1] #point 3 #TODO
-                        delta_angle3 = keys[i][j+1][2][2]
-                        angle3 = self.calculate_joint_angle(name, delta_angle3)
-                        
-                        t = self.start_time / times[i][j+1]
-                        c1 = (1-t)**3
-                        c2 = 3*(1-t)**2
-                        
-                        target_joints[name] = c1*angle0 + c2*angle1*t + c2*angle2*t**2 + angle3*t**3 #each joint will get a new angle value
+        #Iterate through joints
+        for i in range(len(names)):
+            joint = names[i]
+            # Only update known joints
+            if joint in self.joint.names:
+                # Each line of keys corresponds to a time
+                for j in range(len(times[i]) - 1):
+                # Now is before interpolation
+                if self.start_time < times[i][0]:
+                    self.set_bezier_angle(target_joints, joint, self.calculate_first_bezier_angle(times, keys, i, joint))
+                # Now is between interpolation
+                elif times[i][j] < self.start_time < times[i][j + 1]:
+                    self.set_bezier_angle(target_joints, joint, self.calculate_bezier_angle(times, keys, i, j + 1))
         
-        return target_joints
+    def set_bezier_angle(self, target_joints, joint, bezier_angle):
+        if joint in spark_agent.INVERSED_JOINTS:
+            bezier_angle *= -1
+        target_joints[joint] = bezier_angle
+        
+    def calculate_first_bezier_angle(self, times, keys, j_index, joint):
+        '''
+        @param ...
+        @param j_index: index of joint
+        @return bezier(t)
+        '''
+        # Time values
+        t_0 = 0.0
+        t_3 = times[j_index][0]
+        # Angles
+        a_0 = self.perception.joint[joint]
+        a_3 = keys[joint][0][0]
+        # Control angles
+        a_1 = keys[joint][0][1][2] + a_0
+        a_2 = keys[joint][0][2][2] + a_1
+        
+        dt = (self.start_time) / t_3
+        return calculate_bezier_interpolation(a_0, a_1, a_2, a_3, dt)
+        
+    def calculate_bezier_angle(self, times, keys, j_index, t_index):
+        '''
+        @param ...
+        @param j_index: index of joint
+        @param t_index: time index
+        @return bezier(t)
+        '''
+        # Time values
+        t_0 = times[j_index][t_index]
+        t_3 = times[j_index][t_index + 1]
+        # Control points
+        t_1 = keys[joint][t_index][1][1] + t_0
+        t_2 = keys[joint][t_index][2][1] + t_3
+        # Angles
+        a_0 = keys[joint][t_index][0]
+        a_3 = keys[joint][t_index + 1][0]
+        # Control angles
+        a_1 = keys[joint][t_index][1][2] + a_0
+        a_2 = keys[joint][t_index][2][2] + a_3
+        
+        dt = (self.start_time - t_0) / (t_3 - t_0)
+        return calculate_bezier_interpolation(a_0, a_1, a_2, a_3, dt)
+        
+    def calculate_bezier_interpolation(self, a_0, a_1, a_2, a_3, dt):
+        c_0 = (1 - dt)**3
+        c_1 = 3 * (1 - dt)**2
+        c_2 = 3 * (1 - dt)
+        return c_0 * a_0 + c_1 * a_1 * dt + c_2 * a_2 * dt**2 + a_3 * dt**3
         
     def calculate_joint_angle(self, joint_name, delta_angle):
         return self.perception.joint[joint_name] + delta_angle
