@@ -57,18 +57,12 @@ class AngleInterpolationAgent(PIDAgent):
                 for j in range(len(times[i]) - 1):
                     # Now is before interpolation
                     if self.start_time < times[i][0]:
-                        self.set_bezier_angle(target_joints, joint, self.calculate_first_bezier_angle(times, keys, i, joint))
+                        target_joints[joint] = self.calculate_first_bezier_angle(times, keys, i, joint)
                     # Now is between interpolation
                     elif times[i][j] < self.start_time < times[i][j + 1] and j+1 < len(times[i]):
-                        self.set_bezier_angle(target_joints, joint, self.calculate_bezier_angle(times, keys, i, j, joint))
+                        target_joints[joint] = self.calculate_bezier_angle(times, keys, i, j, joint)
         
         return target_joints
-        
-    @staticmethod
-    def set_bezier_angle(target_joints, joint, bezier_angle):
-        if joint in INVERSED_JOINTS:
-            bezier_angle *= -1
-        target_joints[joint] = bezier_angle
         
     def calculate_first_bezier_angle(self, times, keys, j_index, joint):
         '''
