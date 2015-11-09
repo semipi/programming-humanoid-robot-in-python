@@ -71,19 +71,12 @@ class AngleInterpolationAgent(PIDAgent):
         t_0 = 0.0
         t_3 = times[j_index][0]
         
-# ??? Rocket science ???
         # Angles
         a_0 = self.perception.joint[joint]
         a_3 = keys[j_index][0][0]
         # Control angles
         a_1 = keys[j_index][0][1][2] + a_0
         a_2 = keys[j_index][0][2][2] + a_3
-        
-#        a_0 = self.perception.joint[joint]
-#        a_2 = keys[j_index][0][0]
-#        # Control angles
-#        a_1 = keys[j_index][0][1][2] + a_0
-#        a_3 = keys[j_index][0][2][2] + a_2
         
         dt = (start_time) / t_3
         return self.calculate_bezier_interpolation(a_0, a_1, a_2, a_3, dt)
@@ -97,24 +90,17 @@ class AngleInterpolationAgent(PIDAgent):
         '''
         # Time values
         t_0 = times[j_index][t_index]
+        t_3 = times[j_index][t_index + 1]
+        # Control times
         t_1 = keys[j_index][t_index][1][1] + t_0
-        t_2 = times[j_index][t_index + 1]
-        t_3 = keys[j_index][t_index][2][1] + t_2
+        t_2 = keys[j_index][t_index][2][1] + t_3
         
-# ??? Rocket science ???
         # Angles
         a_0 = keys[j_index][t_index][0]
         a_3 = keys[j_index][t_index + 1][0]
         # Control angles
         a_1 = keys[j_index][t_index][1][2] + a_0
         a_2 = keys[j_index][t_index][2][2] + a_3
-        
-#        # Angles
-#        a_0 = keys[j_index][t_index][0]
-#        a_2 = keys[j_index][t_index + 1][0]
-#        # Control angles
-#        a_1 = keys[j_index][t_index][1][2] + a_0
-#        a_3 = keys[j_index][t_index][2][2] + a_2
 #        
         dt = (start_time - t_0) / (t_3 - t_0)
         
