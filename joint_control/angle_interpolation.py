@@ -21,10 +21,7 @@
 
 
 from pid import PIDAgent
-from keyframes import hello, leftBellyToStand, rightBellyToStand
-from keyframes import leftBackToStand
-from spark_agent import INVERSED_JOINTS
-
+from keyframes import hello, leftBackToStand, leftBellyToStand, rightBackToStand, rightBellyToStand, wipe_forehead
 
 class AngleInterpolationAgent(PIDAgent):
     def __init__(self, simspark_ip='localhost',
