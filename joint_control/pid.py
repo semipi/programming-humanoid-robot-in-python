@@ -62,12 +62,18 @@ class PIDController(object):
         d = self.Kd / self.dt * (e - 2 * self.e1 - self.e2)
         
         # Update times
-        self.e2, self.e1 = self.e1, e
+        self.e2, self.e1 = self.e1, e       
         
         # Finish it
-        self.u = p + i + d
+        self.u = p + i + d# + self.predict(sensor)
         return self.u
-
+        
+    """
+    def predict(self, sensor):
+        self.y += sensor * self.dt
+        return self.y.popleft()
+    """
+        
 class PIDAgent(SparkAgent):
     def __init__(self, simspark_ip='localhost',
                  simspark_port=3100,
