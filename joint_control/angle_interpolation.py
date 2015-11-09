@@ -37,11 +37,11 @@ class AngleInterpolationAgent(PIDAgent):
         self.start_time = 0
 
     def think(self, perception):
-        target_joints = self.angle_interpolation(self.keyframes)
+        target_joints = self.angle_interpolation(self.keyframes, perception)
         self.target_joints.update(target_joints)
         return super(AngleInterpolationAgent, self).think(perception)
 
-    def angle_interpolation(self, keyframes):
+    def angle_interpolation(self, keyframes, perception):
         target_joints = {}
         
         self.start_time = self.calculate_start_time(self.perception.time, self.start_time)
