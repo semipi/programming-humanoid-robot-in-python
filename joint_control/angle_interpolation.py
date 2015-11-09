@@ -21,10 +21,9 @@
 
 
 from pid import PIDAgent
-from keyframes import hello, leftBellyToStand, rightBellyToStand
+from keyframes import hello, leftBellyToStand, rightBellyToStand, leftBackToStand
 from keyframes import leftBackToStand
 from spark_agent import INVERSED_JOINTS
-
 
 class AngleInterpolationAgent(PIDAgent):
     def __init__(self, simspark_ip='localhost',
@@ -34,7 +33,7 @@ class AngleInterpolationAgent(PIDAgent):
                  sync_mode=True):
         super(AngleInterpolationAgent, self).__init__(simspark_ip, simspark_port, teamname, player_id, sync_mode)
         self.keyframes = ([], [], [])
-        self.start_time = 0
+        self.start_time = self.perception.time
 
     def think(self, perception):
         target_joints = self.angle_interpolation(self.keyframes, perception)
@@ -44,7 +43,7 @@ class AngleInterpolationAgent(PIDAgent):
     def angle_interpolation(self, keyframes, perception):
         target_joints = {}
         
-        self.start_time = self.calculate_start_time(self.perception.time, self.start_time)
+        start_time = perception.time - self.start_time
         
         names, times, keys = keyframes
         
@@ -56,15 +55,15 @@ class AngleInterpolationAgent(PIDAgent):
                 # Each line of keys corresponds to a time
                 for j in range(len(times[i]) - 1):
                     # Now is before interpolation
-                    if self.start_time < times[i][0]:
-                        target_joints[joint] = self.calculate_first_bezier_angle(times, keys, i, joint)
+                    if start_time < times[i][0]:
+                        target_joints[joint] = self.calculate_first_bezier_angle(times, keys, i, joint, start_time)
                     # Now is between interpolation
-                    elif times[i][j] < self.start_time < times[i][j + 1] and j+1 < len(times[i]):
-                        target_joints[joint] = self.calculate_bezier_angle(times, keys, i, j, joint)
+                    elif times[i][j] < start_time < times[i][j + 1] and j+1 < len(times[i]):
+                        target_joints[joint] = self.calculate_bezier_angle(times, keys, i, j, joint, start_time)
         
         return target_joints
         
-    def calculate_first_bezier_angle(self, times, keys, j_index, joint):
+    def calculate_first_bezier_angle(self, times, keys, j_index, joint, start_time):
         '''
         @param ...
         @param j_index: index of joint
@@ -88,10 +87,10 @@ class AngleInterpolationAgent(PIDAgent):
 #        a_1 = keys[j_index][0][1][2] + a_0
 #        a_3 = keys[j_index][0][2][2] + a_2
         
-        dt = (self.start_time) / t_3
+        dt = (start_time) / t_3
         return self.calculate_bezier_interpolation(a_0, a_1, a_2, a_3, dt)
         
-    def calculate_bezier_angle(self, times, keys, j_index, t_index, joint):
+    def calculate_bezier_angle(self, times, keys, j_index, t_index, joint, start_time):
         '''
         @param ...
         @param j_index: index of joint
@@ -119,7 +118,7 @@ class AngleInterpolationAgent(PIDAgent):
 #        a_1 = keys[j_index][t_index][1][2] + a_0
 #        a_3 = keys[j_index][t_index][2][2] + a_2
 #        
-        dt = (self.start_time - t_1) / (t_3 - t_1)
+        dt = (start_time - t_0) / (t_3 - t_0)
         
         return self.calculate_bezier_interpolation(a_0, a_1, a_2, a_3, dt)
         
@@ -130,15 +129,10 @@ class AngleInterpolationAgent(PIDAgent):
         c_2 = 3 * (1 - dt)
         return c_0 * a_0 + c_1 * a_1 * dt + c_2 * a_2 * dt**2 + a_3 * dt**3
         
-    @staticmethod
-    def calculate_start_time(perception_time, old_start_time):
-        new_start_value = perception_time - old_start_time
-        return 0 if new_start_value < 0 else new_start_value
-        
 
 if __name__ == '__main__':
     agent = AngleInterpolationAgent()
-    agent.keyframes = hello()  #hello, leftBackToStand, leftBellyToStand, rightBackToStand, rightBellyToStand, wipe_forehead
+    agent.keyframes = leftBackToStand()  #hello, leftBackToStand, leftBellyToStand, rightBackToStand, rightBellyToStand, wipe_forehead
     agent.run()
     
 
