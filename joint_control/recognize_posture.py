@@ -16,6 +16,7 @@ import pickle as pickle
 from os import listdir, path
 
 ROBOT_POSE_DATA_DIR = 'robot_pose_data'
+ROBOT_POSE_CLR = 'robot_pose.pkl'
 
 class PostureRecognitionAgent(AngleInterpolationAgent):
     def __init__(self, simspark_ip='localhost',
@@ -25,7 +26,7 @@ class PostureRecognitionAgent(AngleInterpolationAgent):
                  sync_mode=True):
         super(PostureRecognitionAgent, self).__init__(simspark_ip, simspark_port, teamname, player_id, sync_mode)
         self.posture = 'unknown'
-        self.posture_classifier = 'robot_pose.pkl'
+        self.posture_classifier = ROBOT_POSE_CLR
 
     def think(self, perception):
         self.posture = self.recognize_posture(perception)
