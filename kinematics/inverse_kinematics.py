@@ -12,9 +12,12 @@
 
 from forward_kinematics import ForwardKinematicsAgent
 from numpy.matlib import identity
+from joint_data_provider import CHAINS
 
+EPSILON = 1e-6
 
 class InverseKinematicsAgent(ForwardKinematicsAgent):
+    
     def inverse_kinematics(self, effector_name, transform):
         '''solve the inverse kinematics
 
@@ -23,6 +26,10 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
         :return: list of joint angles
         '''
         joint_angles = []
+        
+   #     while True:
+            
+            
         # YOUR CODE HERE
         return joint_angles
 

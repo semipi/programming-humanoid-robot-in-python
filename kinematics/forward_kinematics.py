@@ -18,13 +18,14 @@
 # add PYTHONPATH
 import os
 import sys
+import numpy as np
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'joint_control'))
 
 from numpy.matlib import matrix, identity
 
 from angle_interpolation import AngleInterpolationAgent
-
-
+from joint_data_provider import OFFSET, CHAINS
+         
 class ForwardKinematicsAgent(AngleInterpolationAgent):
     def __init__(self, simspark_ip='localhost',
                  simspark_port=3100,
@@ -35,9 +36,6 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         self.transforms = {n: identity(4) for n in self.joint_names}
 
         # chains defines the name of chain and joints of the chain
-        self.chains = {'Head': ['HeadYaw', 'HeadPitch']
-                       # YOUR CODE HERE
-                       }
 
     def think(self, perception):
         self.forward_kinematics(perception.joint)
@@ -51,24 +49,28 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         :return: transformation
         :rtype: 4x4 matrix
         '''
-        T = matrix()
-        # YOUR CODE HERE
+        
+        s = np.sin(joint_angle)
+        c = np.cos(joint_angle)
+        x, y, z = OFFSET[joint_name]
+        
+        return np.matrix([[c**2, c * s, s, x], 
+                          [c * s * (s + 1), c**2 - s**3, c * s, y],
+                          [-s * (s + c**2), s * c * (1 - s), c**2, z],
+                          [0, 0, 0, 1]])
 
-        return T
 
     def forward_kinematics(self, joints):
         '''forward kinematics
 
         :param joints: {joint_name: joint_angle}
         '''
-        for chain_joints in self.chains.values():
+        for chain_joints in CHAINS.values():
             T = identity(4)
             for joint in chain_joints:
                 angle = joints[joint]
-                Tl = local_trans(joint, angle)
-                # YOUR CODE HERE
-
-                self.transforms[joint] = T
+                Tl = self.local_trans(joint, angle)
+                self.transforms[joint] = np.dot(T, Tl)
 
 if __name__ == '__main__':
     agent = ForwardKinematicsAgent()
