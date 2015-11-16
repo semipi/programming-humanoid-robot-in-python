@@ -40,8 +40,7 @@ class PostureRecognitionAgent(AngleInterpolationAgent):
     def get_actual_posture_data(self, perception):
         posture_data = []
         
-        posture_data.append(perception.imu[0])
-        posture_data.append(perception.imu[1])
+        
         posture_data.append(perception.joint['LHipYawPitch'])
         posture_data.append(perception.joint['LHipRoll'])
         posture_data.append(perception.joint['LHipPitch'])
@@ -50,6 +49,8 @@ class PostureRecognitionAgent(AngleInterpolationAgent):
         posture_data.append(perception.joint['RHipRoll'])
         posture_data.append(perception.joint['RHipPitch'])
         posture_data.append(perception.joint['RKneePitch'])
+	posture_data.append(perception.imu[0])
+        posture_data.append(perception.imu[1])
         
         return posture_data
 
