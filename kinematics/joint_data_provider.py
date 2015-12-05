@@ -4,6 +4,8 @@ Created on Mon Nov 16 17:39:12 2015
 
 @author: kai & maik
 """
+from sets import Set
+from numpy import matrix
 
 HEADYAW         = 'HeadYaw'
 HEADPITCH       = 'HeadPitch'
@@ -60,17 +62,17 @@ CHAINS = { 'Head' : [HEADYAW, HEADPITCH],
           }
           
 JOINTS = { 'X': (Set([RELBOWYAW, LELBOWYAW, RHIPROLL, LHIPROLL, RANKLEROLL, LANKLEROLL]), 
-                lambda s, c: np.matrix([[1, 0, 0, 0],
-                                     [0, c, -s, 0],
-                                     [0, s, c, 0],
-                                     [0, 0, 0, 1]]))
+                 lambda s, c: matrix([[1, 0, 0, 0],
+                                      [0, c, -s, 0],
+                                      [0, s, c, 0],
+                                      [0, 0, 0, 1]])),
            'Y': (Set([HEADPITCH, RSHOULDERPITCH, LSHOULDERPITCH, RHIPYAWPITCH, LHIPYAWPITCH, RHIPPITCH, LHIPPITCH, RKNEEPITCH, LKNEEPITCH, RANKLEPITCH, LANKLEPITCH]),
-                lambda s, c: np.matrix([[c, 0, s, 0],
-                                     [0, 1, 0, 0],
-                                     [-s, 0, c, 0],
-                                     [0, 0, 0, 1]]))
+                 lambda s, c: matrix([[c, 0, s, 0],
+                                      [0, 1, 0, 0],
+                                      [-s, 0, c, 0],
+                                      [0, 0, 0, 1]])),
            'Z': (Set([HEADYAW, RSHOULDERROLL, LSHOULDERROLL, RELBOWROLL, LELBOWROLL, RHIPYAWPITCH, LHIPYAWPITCH]),
-                lambda s, c: np.matrix([[c, s, 0, 0],
-                                     [-s, c, 0, 0],
-                                     [0, 0, 1, 0],
-                                     [0, 0, 0, 1]]))}    
+                 lambda s, c: matrix([[c, s, 0, 0],
+                                      [-s, c, 0, 0],
+                                      [0, 0, 1, 0],
+                                      [0, 0, 0, 1]]))}    

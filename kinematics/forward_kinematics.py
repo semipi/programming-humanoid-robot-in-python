@@ -48,19 +48,19 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         :return: transformation
         :rtype: 4x4 matrix
         '''
-        T = identity(4, dtype=float)
+        T = identity(4)
         s = np.sin(joint_angle)
         c = np.cos(joint_angle)
         
         # transformation
         for trafo in (matrix for key, (joint, matrix) in JOINTS.iteritems() if joint_name in joint):
             T = np.dot(T, trafo(s, c))   
-         
+        
         # offset       
-        x, y, z = OFFSET[joint_name]
-        T[0][3] = x
-        T[1][3] = y
-        T[2][3] = z
+        x, y, z = OFFSET[joint_name]     
+        T[0][:3] = x
+        T[1][:3] = y
+        T[2][:3] = z
         
         return T
 
