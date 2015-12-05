@@ -53,7 +53,7 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         c = np.cos(joint_angle)
         
         # transformation
-        for trafo in (matrix for key, (joint, matrix) in JOINTS.iteritems() if joint_name in joint):
+        for trafo in (matrix for matrix, joint in JOINTS.iteritems() if joint_name in joint):
             T = np.dot(T, trafo(s, c))   
         
         # offset       
@@ -61,7 +61,7 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         T[0][:3] = x
         T[1][:3] = y
         T[2][:3] = z
-        
+    
         return T
 
 
