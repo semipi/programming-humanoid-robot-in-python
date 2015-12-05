@@ -65,14 +65,14 @@ class PIDController(object):
         self.e2, self.e1 = self.e1, e       
         
         # Finish it
-        self.u = p + i + d# + self.predict(sensor)
+        self.u = p + i + d + self.predict(sensor)
         return self.u
         
-    """
+    
     def predict(self, sensor):
-        self.y += sensor * self.dt
+        self.y.append(sensor * self.dt)
         return self.y.popleft()
-    """
+    
         
 class PIDAgent(SparkAgent):
     def __init__(self, simspark_ip='localhost',
