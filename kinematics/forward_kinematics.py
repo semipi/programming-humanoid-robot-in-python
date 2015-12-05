@@ -24,8 +24,8 @@ sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '
 from numpy.matlib import matrix, identity
 
 from angle_interpolation import AngleInterpolationAgent
-from joint_data_provider import OFFSET, CHAINS
-         
+from joint_data_provider import OFFSET, CHAINS, JOINTS
+                                      
 class ForwardKinematicsAgent(AngleInterpolationAgent):
     def __init__(self, simspark_ip='localhost',
                  simspark_port=3100,
@@ -43,21 +43,26 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
 
     def local_trans(self, joint_name, joint_angle):
         '''calculate local transformation of one joint
-
         :param str joint_name: the name of joint
         :param float joint_angle: the angle of joint in radians
         :return: transformation
         :rtype: 4x4 matrix
         '''
-        
+        T = identity(4, dtype=float)
         s = np.sin(joint_angle)
         c = np.cos(joint_angle)
-        x, y, z = OFFSET[joint_name]
         
-        return np.matrix([[c**2, c * s, s, x], 
-                          [c * s * (s + 1), c**2 - s**3, c * s, y],
-                          [-s * (s + c**2), s * c * (1 - s), c**2, z],
-                          [0, 0, 0, 1]])
+        # transformation
+        for trafo in (matrix for key, (joint, matrix) in JOINTS.iteritems() if joint_name in joint):
+            T = np.dot(T, trafo(s, c))   
+         
+        # offset       
+        x, y, z = OFFSET[joint_name]
+        T[0][3] = x
+        T[1][3] = y
+        T[2][3] = z
+        
+        return T
 
 
     def forward_kinematics(self, joints):

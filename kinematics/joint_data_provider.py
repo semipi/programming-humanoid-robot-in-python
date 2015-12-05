@@ -35,7 +35,7 @@ OFFSET = {  HEADYAW       : (   0.00,   0.00, 126.50),
             LELBOWYAW     : ( 105.00,  15.00,   0.00),
             LELBOWROLL    : (   0.00,   0.00,   0.00),
             RSHOULDERPITCH: (   0.00, -98.00, 100.00),
-            RSHOULDERROLL: (   0.00,   0.00,   0.00),
+            RSHOULDERROLL : (   0.00,   0.00,   0.00),
             RELBOWYAW     : ( 105.00, -15.00,   0.00),
             RELBOWROLL    : (   0.00,   0.00,   0.00),
             LHIPYAWPITCH  : (   0.00,  50.00, -85.00),
@@ -58,4 +58,19 @@ CHAINS = { 'Head' : [HEADYAW, HEADPITCH],
 		'RLeg' : [RHIPYAWPITCH, RHIPROLL, RHIPPITCH, RKNEEPITCH, RANKLEPITCH, RANKLEROLL],
 		'RArm' : [RSHOULDERPITCH, RSHOULDERROLL, RELBOWYAW, RELBOWROLL],
           }
- 
+          
+JOINTS = { 'X': (Set([RELBOWYAW, LELBOWYAW, RHIPROLL, LHIPROLL, RANKLEROLL, LANKLEROLL]), 
+                lambda s, c: np.matrix([[1, 0, 0, 0],
+                                     [0, c, -s, 0],
+                                     [0, s, c, 0],
+                                     [0, 0, 0, 1]]))
+           'Y': (Set([HEADPITCH, RSHOULDERPITCH, LSHOULDERPITCH, RHIPYAWPITCH, LHIPYAWPITCH, RHIPPITCH, LHIPPITCH, RKNEEPITCH, LKNEEPITCH, RANKLEPITCH, LANKLEPITCH]),
+                lambda s, c: np.matrix([[c, 0, s, 0],
+                                     [0, 1, 0, 0],
+                                     [-s, 0, c, 0],
+                                     [0, 0, 0, 1]]))
+           'Z': (Set([HEADYAW, RSHOULDERROLL, LSHOULDERROLL, RELBOWROLL, LELBOWROLL, RHIPYAWPITCH, LHIPYAWPITCH]),
+                lambda s, c: np.matrix([[c, s, 0, 0],
+                                     [-s, c, 0, 0],
+                                     [0, 0, 1, 0],
+                                     [0, 0, 0, 1]]))}    
