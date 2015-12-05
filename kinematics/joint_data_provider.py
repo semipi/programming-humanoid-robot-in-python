@@ -60,21 +60,19 @@ CHAINS = { 'Head' : [HEADYAW, HEADPITCH],
 		'RLeg' : [RHIPYAWPITCH, RHIPROLL, RHIPPITCH, RKNEEPITCH, RANKLEPITCH, RANKLEROLL],
 		'RArm' : [RSHOULDERPITCH, RSHOULDERROLL, RELBOWYAW, RELBOWROLL],
           }
-          
+        
 JOINTS = {lambda s, c: matrix([[1, 0, 0, 0],
                                [0, c, -s, 0],
                                [0, s, c, 0],
                                [0, 0, 0, 1]]): 
-                        Set([RELBOWYAW, LELBOWYAW, RHIPROLL, LHIPROLL, RANKLEROLL, LANKLEROLL]),
-                 
+                        Set([RELBOWYAW, LELBOWYAW, RHIPROLL, LHIPROLL, RANKLEROLL, LANKLEROLL]),              
           lambda s, c: matrix([[c, 0, s, 0],
                                [0, 1, 0, 0],
                                [-s, 0, c, 0],
                                [0, 0, 0, 1]]):
-                        Set([HEADPITCH, RSHOULDERPITCH, LSHOULDERPITCH, RHIPYAWPITCH, LHIPYAWPITCH, RHIPPITCH, LHIPPITCH, RKNEEPITCH, LKNEEPITCH, RANKLEPITCH, LANKLEPITCH]),
-                 
-           lambda s, c: matrix([[c, s, 0, 0],
-                                [-s, c, 0, 0],
-                                [0, 0, 1, 0],
-                                [0, 0, 0, 1]]): 
+                        Set([HEADPITCH, RSHOULDERPITCH, LSHOULDERPITCH, RHIPYAWPITCH, LHIPYAWPITCH, RHIPPITCH, LHIPPITCH, RKNEEPITCH, LKNEEPITCH, RANKLEPITCH, LANKLEPITCH]),                
+          lambda s, c: matrix([[c, s, 0, 0],
+                               [-s, c, 0, 0],
+                               [0, 0, 1, 0],
+                               [0, 0, 0, 1]]): 
                         Set([HEADYAW, RSHOULDERROLL, LSHOULDERROLL, RELBOWROLL, LELBOWROLL, RHIPYAWPITCH, LHIPYAWPITCH])}    
