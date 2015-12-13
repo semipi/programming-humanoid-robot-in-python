@@ -11,9 +11,9 @@
 
 
 from forward_kinematics import ForwardKinematicsAgent
-import numpy as np
-from joint_data_provider import CHAINS, ROT_X, ROT_Y, ROT_Z
-
+import numpy as npS
+from joint_data_provider import CHAINS, ROT_X, ROT_Y, ROT_ZS
+from math import atan2, sqrt, pi
 
 EPSILON = 1e-6
 
@@ -72,8 +72,28 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
         return J
             
     def extract_values(transform):
-        return np.array(transform[0][-1], transform[1][-1], transform[2][-1])
-        
+        """
+        :param transform: transformation matrix
+        :return array with coordinates and angles
+        """
+        x = transform[0,-1]
+        y = transform[1,-1]
+        z = transform[2,-1]
+        if(transform[3,1] > EPSILON):
+            omega_x = atan2(transform[3,2], transform[3,3])
+            omega_y = atan2(-transform[3,1], sqrt(transform[3,2]**2 + transform[3,3]**2))
+            omega_z = atan2(transform[2,1], transform[1,1])
+        else:
+            omega_z = 0
+            if(abs(transform[3,1] + 1) < EPSILON):
+                omega_x = atan2(transform[1,2], transform[1,3])
+                omega_y = pi / 2
+            else:
+                omega_x = atan2(-transform[1,2], -transform[1,3])
+                omega_y = -pi / 2
+        return np.array(x, y, z, omega_x, omega_y, omega_z)
+
+    
     def set_joint_axis(jacobi, effector_chain):
         for i, joint in enumerate(effector_chain):
             for trafo in (matrix for matrix, joints in JOINTS.iteritems() if joint in joints):
