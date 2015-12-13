@@ -56,9 +56,9 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         
         # offset       
         x, y, z = OFFSET[joint_name]     
-        T[0,3] = x
-        T[1,3] = y
-        T[2,3] = z
+        T[3,0] = x
+        T[3,1] = y
+        T[3,2] = z
     
         return T
 
