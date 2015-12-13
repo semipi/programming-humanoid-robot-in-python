@@ -12,7 +12,6 @@
 
 from forward_kinematics import ForwardKinematicsAgent
 import numpy as np
-from np.matlib import identity
 from joint_data_provider import CHAINS
 
 
@@ -45,12 +44,20 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
 
 	
         
+        
    #     while True:
             
             
         # YOUR CODE HERE
         return joint_angles
         
+def calculate_alpha(error, jacobi):
+        """
+        :param error: vector which contains the error
+        :param jacobi: jacobian matrix
+        """
+        JJTe = np.dot(np.dot(jacobi, np.transpose(jacobi)), error)
+        return float(np.inner(error, JJTe)) / float(np.inner(JJTe, JJTe))
 
     def set_transforms(self, effector_name, transform):
         '''solve the inverse kinematics and control joints use the results
