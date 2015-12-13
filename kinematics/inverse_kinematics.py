@@ -12,7 +12,7 @@
 
 from forward_kinematics import ForwardKinematicsAgent
 import numpy as np
-from joint_data_provider import CHAINS
+from joint_data_provider import CHAINS, ROT_X, ROT_Y, ROT_Z
 
 
 EPSILON = 1e-6
@@ -26,9 +26,10 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
         :param transform: 4x4 transform matrix
         :return: list of joint angles
         '''
-        joint_angles = []
-        fitting_joints = {key : self.perception.joint[key] for key in CHAINS[effector_name]} #get joint->angle for all effector joints
-        end_effector = CHAINS[effector_name][-1] # end effector for the given effectr chain
+        fitting_joints = {key : self.perception.joint[key] for key in CHAINS[effector_name]} #get (joint->angle ) for all effector joints
+        theta = np.zeros(len(fitting_joints)) #initial return value
+        effector_chain = CHAINS[effector_name] #end effector for the given effectr chain
+        end_effector = effector_chain[-1] #end_effector
             
         while True: #break loop if angles are satisfiable
         
@@ -36,11 +37,19 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
             T = self.transforms #result of forward kinematics for effector joints
             error = transform - T[end_effector] #calculate distance between target and actual result
             
-            J = calculate_jacobian_matrix(error)
+            jacobi = calculate_jacobian_matrix(error) #get jacobian matrix
+            jacobi = set_joint_axis(jacobi, effector_chain) #set theta values for joint rotation axes to 1
             
+            alpha = calculate_alpha(error, jacobi) #get scalar for jacobian tranpose method
             
-        # YOUR CODE HERE
-        return joint_angles
+            d_theta = alpha * jacobi.T * error #jacobian transpose method
+            theta += d_theta #update theta value
+            update_joint_angles(fitting_joints) #update joint angles for next iteration
+            
+            if np.inner(error, error) < EPSILON: #break if scalar product of error is lower than tolerated error
+                break
+            
+        return theta
         
     def calculate_alpha(error, jacobi):
         """
@@ -64,7 +73,18 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
             
     def extract_values(transform):
         return np.array(transform[0][-1], transform[1][-1], transform[2][-1])
+        
+    def set_joint_axis(jacobi, effector_chain):
+        for i, joint in enumerate(effector_chain):
+            for trafo in (matrix for matrix, joints in JOINTS.iteritems() if joint in joints):
+                jacobi[get_angle_index(trafo), i] = 1
 
+    def get_angle_index(rotation):
+        return 3 if rotation is ROT_X else 4 if rotation is ROT_Y else 5
+        
+    def update_joint_angles(joints, theta):
+        for i in range(0, theta):
+            joints[i] = theta[i]
 	
 if __name__ == '__main__':
     agent = InverseKinematicsAgent()
