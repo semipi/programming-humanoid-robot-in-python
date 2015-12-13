@@ -11,8 +11,10 @@
 
 
 from forward_kinematics import ForwardKinematicsAgent
-from numpy.matlib import identity
+import numpy as np
+from np.matlib import identity
 from joint_data_provider import CHAINS
+
 
 EPSILON = 1e-6
 
@@ -26,19 +28,46 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
         :return: list of joint angles
         '''
         joint_angles = []
+        fitting_joints = {key : self.perception.joint[key] for key in CHAINS[effector_name]} #get joint->angle for all effector joints
+        end_effector = CHAINS[effector_name][-1] # end effector for the given effectr chain
+            
+        while True: #break loop if angles are satisfiable
+        
+            self.forward_kinematics(fitting_joints) #execute forward kinematics
+            T = self.transforms #result of forward kinematics for effector joints
+            error = transform - T[end_effector] #calculate distance between target and actual result
+            
+            J = calculate_jacobian_matrix(error)
+            
+        
+
+	
+
+	
         
    #     while True:
             
             
         # YOUR CODE HERE
         return joint_angles
+        
 
     def set_transforms(self, effector_name, transform):
         '''solve the inverse kinematics and control joints use the results
         '''
-        # YOUR CODE HERE
+        
+        self.inverse_kinematics(effector_name, transform)
         self.keyframes = ([], [], [])  # the result joint angles have to fill in
+        
+    def calculate_jacobian_matrix(error):
+        for transform in error.T:
+            J.append(extract_values(transform))
+        return J
+            
+    def extract_values(transform):
+        return np.array(transform[0][-1], transform[1][-1], transform[2][-1])
 
+	
 if __name__ == '__main__':
     agent = InverseKinematicsAgent()
     # test inverse kinematics
