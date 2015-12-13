@@ -38,20 +38,11 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
             
             J = calculate_jacobian_matrix(error)
             
-        
-
-	
-
-	
-        
-        
-   #     while True:
-            
             
         # YOUR CODE HERE
         return joint_angles
         
-def calculate_alpha(error, jacobi):
+    def calculate_alpha(error, jacobi):
         """
         :param error: vector which contains the error
         :param jacobi: jacobian matrix
