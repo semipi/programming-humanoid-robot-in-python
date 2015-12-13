@@ -35,8 +35,6 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         super(ForwardKinematicsAgent, self).__init__(simspark_ip, simspark_port, teamname, player_id, sync_mode)
         self.transforms = {n: identity(4) for n in self.joint_names}
 
-        # chains defines the name of chain and joints of the chain
-
     def think(self, perception):
         self.forward_kinematics(perception.joint)
         return super(ForwardKinematicsAgent, self).think(perception)
@@ -64,10 +62,8 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
     
         return T
 
-
     def forward_kinematics(self, joints):
         '''forward kinematics
-
         :param joints: {joint_name: joint_angle}
         '''
         for chain_joints in CHAINS.values():
